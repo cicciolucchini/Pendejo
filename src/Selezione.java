@@ -21,6 +21,7 @@ public class Selezione {
         n = 1;
     }
 
+
     /**
      * Costruttore che crea una selezione composta da un numero variabile di copie (compreso tra 1 e
      * 4) di una carta.
@@ -87,4 +88,11 @@ public class Selezione {
     public boolean equals(Object o) {
         return (this.hashCode()==o.hashCode());
     };
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getN()).append(" ").append(getCarta().toString());
+        return sb.toString();
+
+    }
 }
