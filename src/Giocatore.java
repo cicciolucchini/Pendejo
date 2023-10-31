@@ -7,16 +7,19 @@ import java.util.Map;
 import java.util.Set;
 
 public class Giocatore {
-    private final Map<Carta, Integer> mano = new HashMap<>(13);;
+    private final Map<Carta, Integer> mano = new HashMap<>(13);
 
     private final Carta[] scoperte = new Carta[3];
 
     private final Carta[] coperte = new Carta[3];
 
     private int size = 0;
+    private int scop_size = 3;
+
+    private int cop_size = 3;
 
     public Giocatore() {
-        for (int i = 1; i < 14; i++) {
+        for (int i = 2; i < 15; i++) {
             mano.put(new Carta(i), 0);
         }
     }
@@ -48,7 +51,7 @@ public class Giocatore {
     public void aggiungiCarta(Carta c) {
         int n = getCount(c);
         mano.replace(c, n+1);
-
+        size++;
     }
 
     /**
@@ -76,9 +79,7 @@ public class Giocatore {
      */
     public void setCoperte(Carta[] c) throws IllegalArgumentException {
         if (c.length != 3) {throw new IllegalArgumentException();}
-        for (int i = 0; i < 3; i++) {
-            coperte[i] = c[i];
-        }
+        System.arraycopy(c, 0, coperte, 0, 3);
     }
 
     /**
@@ -88,9 +89,7 @@ public class Giocatore {
      */
     public void setScoperte(Carta[] c) throws IllegalArgumentException {
         if (c.length != 3) {throw new IllegalArgumentException();}
-        for (int i = 0; i < 3; i++) {
-            scoperte[i] = c[i];
-        }
+        System.arraycopy(c, 0, scoperte, 0, 3);
     }
 
     /**
@@ -110,7 +109,6 @@ public class Giocatore {
 
     public String toString() {
         StringBuilder sb = new StringBuilder("Mano del giocatore:\n");
-
         for (Map.Entry<Carta, Integer> entry : mano.entrySet()) {
             if (entry.getValue() != 0) {
                 switch (entry.getValue()) {
@@ -135,7 +133,7 @@ public class Giocatore {
 
     /**
      * Effettua la selezione delle carte per conto del giocatore.
-     * @param Tavolo
+     * @param Tavolo le carte a cui rispondere.
      * @return la selezione di carte giocate.
      */
     public Selezione scegliCarta(Selezione Tavolo) {
@@ -151,16 +149,16 @@ public class Giocatore {
                     System.out.println("Inserire il numero di carte da giocare");
                     int n = Integer.parseInt(reader.readLine());
                     scelta = new Selezione(s.getCarta(), n);
-                };
+                }
             }
         } catch (IOException e) {
         }
         diminuisciCarte(scelta.getCarta(), scelta.getN());
         return scelta;
-    };
+    }
 
     private void diminuisciCarte(Carta c, int n) {
-        mano.replace(c, mano.get(c) - n);
+        mano.replace(c, mano.get(c) - 1);
     }
 
     /**
@@ -170,16 +168,40 @@ public class Giocatore {
      */
     private Set<Selezione> selezioneSet(Selezione Tavolo) {
         Set<Selezione> selSet = new HashSet<>();
-        if (Tavolo.getCarta().equals(new Carta(7))) {
-            for (Map.Entry<Carta, Integer> entry : mano.entrySet()) {
-                if (entry.getKey().val() <= 7 || entry.getKey().isSpecial()) {
-                    selSet.add(new Selezione(entry.getKey(), entry.getValue()));
-                }
-            }
+        if (getSize() == 0 && scop_size == 0) {
+
         } else {
-            for (Map.Entry<Carta, Integer> entry : mano.entrySet()) {
-                if (entry.getKey().isSpecial() || entry.getKey().val() >= Tavolo.getCarta().val()) {
-                    selSet.add(new Selezione(entry.getKey(), entry.getValue()));
+            if (getSize()== 0) {
+                for (Carta c : scoperte) {
+                    aggiungiCarta(c);
+                }
+                if (Tavolo.getCarta().equals(new Carta(7))) {
+                    for (Map.Entry<Carta, Integer> entry : mano.entrySet()) {
+                        if (entry.getKey().val() <= 7 || entry.getKey().isSpecial()) {
+                            selSet.add(new Selezione(entry.getKey(), entry.getValue()));
+                        }
+                    }
+                } else {
+                    for (Map.Entry<Carta, Integer> entry : mano.entrySet()) {
+                        if (entry.getKey().isSpecial() || entry.getKey().val() >= Tavolo.getCarta().val()) {
+                            selSet.add(new Selezione(entry.getKey(), entry.getValue()));
+                        }
+                    }
+                }
+            } else {
+                if (Tavolo.getCarta().equals(new Carta(7))) {
+                    for (Map.Entry<Carta, Integer> entry : mano.entrySet()) {
+                        if (entry.getKey().val() <= 7 || entry.getKey().isSpecial()) {
+                            selSet.add(new Selezione(entry.getKey(), entry.getValue()));
+                        }
+                    }
+                }
+                else {
+                    for (Map.Entry<Carta, Integer> entry : mano.entrySet()) {
+                        if (entry.getKey().isSpecial() || entry.getKey().val() >= Tavolo.getCarta().val()) {
+                            selSet.add(new Selezione(entry.getKey(), entry.getValue()));
+                        }
+                    }
                 }
             }
         }
@@ -189,14 +211,24 @@ public class Giocatore {
             }
         }
         return selSet;
-    };
+    }
 
     private String stringScelte(Set<Selezione> selSet) {
         StringBuilder sb = new StringBuilder("Lista delle scelte disponibili:\n");
         for (Selezione s: selSet) {
-            sb.append("Fino a ").append(s.toString()).append("\n");
+            if (getCount(s.getCarta()) >= 1) {
+                sb.append("Fino a ").append(s.toString()).append("\n");
+            }
         }
         return sb.toString();
+    }
+
+    public void pescaPila(Scarti pila) {
+        for (Selezione s : pila.getPila()) {
+            for (int i = 0; i < s.getN(); i++) {
+                aggiungiCarta(s.getCarta());
+            }
+        }
     }
 
 }

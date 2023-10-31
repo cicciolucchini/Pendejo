@@ -6,11 +6,20 @@ public class Scarti {
     public Selezione getTop() {
         return top;
     }
+
+    public void setTop(Selezione s) {
+        top = s;
+    }
+
+    public Scarti() {
+        top = new Selezione();
+    }
+
     public Stack<Selezione> getPila() {
        return pila;
     }
     public void wipePila() {
         pila.clear();
-        top = null;
+        top = new Selezione();
     }
 }

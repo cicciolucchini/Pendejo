@@ -7,8 +7,11 @@ Classe che descrive una Carta, ovvero un oggetto dotato di valore numerico, da 1
 Le carte 2, 3, e 10 sono cosiddette speciali.
  */
 public class Carta {
-    //Il valore numerico della carta
+    /**
+     * Il valore numerico della carta.
+     */
     private final int valore;
+
     /**
      * Il nome della carta.
      */
@@ -36,7 +39,7 @@ public class Carta {
      * @throws IllegalArgumentException se il numero della carta non è compreso tra 1 e 13.
      */
     public Carta(int n) throws IllegalArgumentException{
-        if (n > 14 || n < 2) {throw new IllegalArgumentException();}
+        if ((n > 15) || (n < 2)) {throw new IllegalArgumentException();}
         valore = n;
         nome = CardMap.get(n);
     }

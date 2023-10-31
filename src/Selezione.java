@@ -13,16 +13,10 @@ public class Selezione {
     private int n;
 
     /**
-     * Costruttore che crea una selezione composta da una sola carta specificata.
-     * @param c la carta.
+     * Crea una selezione vuota.
      */
-    public Selezione(Carta c) {
-        carta = c;
-        n = 1;
-    }
-
     public Selezione() {
-        carta = null;
+        carta = new Carta(4);
         n = 0;
     }
 
@@ -91,13 +85,12 @@ public class Selezione {
     }
 
     public boolean equals(Object o) {
+        if (!(o instanceof Selezione)) throw new IllegalArgumentException();
         return (this.hashCode()==o.hashCode());
     };
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getN()).append(" ").append(getCarta().toString());
-        return sb.toString();
+        return getN() + " " + getCarta().toString();
 
     }
 }
