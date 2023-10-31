@@ -1,3 +1,6 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -19,21 +22,7 @@ public class Giocatore {
     }
 
     /**
-     * Metodo che restituisce l'insieme di selezioni possibili per un giocatore date le carte in
-     * cima.
-     * @param top le carte in cima alla pila degli scarti.
-     * @return un insieme delle possibili selezioni.
-    */
-    public Set<Selezione> selezioneSet(Selezione top) {
-        Set<Selezione> selSet = new HashSet<>();
-        Map<Carta, Integer> mano = getMano();
-        for (Carta c : mano.keySet()) {
-            for (int i = 1; i <= mano.get(c); i++) {
-                selSet.add(new Selezione(c, i));
-            }
-        }
-        return selSet;
-    }
+
 
     /**
      * Metodo che permette al giocatore di pescare carte.
@@ -144,5 +133,70 @@ public class Giocatore {
         return sb.toString();
     }
 
+    /**
+     * Effettua la selezione delle carte per conto del giocatore.
+     * @param Tavolo
+     * @return la selezione di carte giocate.
+     */
+    public Selezione scegliCarta(Selezione Tavolo) {
+        Set<Selezione> selSet = selezioneSet(Tavolo);
+        System.out.println(stringScelte(selSet));
+        System.out.println("Inserire la carta scelta");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        Selezione scelta = new Selezione();
+        try {
+            String carta = reader.readLine();
+            for (Selezione s : selSet) {
+                if (s.getCarta().toString().equals(carta)) {
+                    System.out.println("Inserire il numero di carte da giocare");
+                    int n = Integer.parseInt(reader.readLine());
+                    scelta = new Selezione(s.getCarta(), n);
+                };
+            }
+        } catch (IOException e) {
+        }
+        diminuisciCarte(scelta.getCarta(), scelta.getN());
+        return scelta;
+    };
+
+    private void diminuisciCarte(Carta c, int n) {
+        mano.replace(c, mano.get(c) - n);
+    }
+
+    /**
+     * Restituisce l'insieme delle scelte possibili.
+     * @param Tavolo le carte sul tavolo
+     * @return l'insieme di scelte
+     */
+    private Set<Selezione> selezioneSet(Selezione Tavolo) {
+        Set<Selezione> selSet = new HashSet<>();
+        if (Tavolo.getCarta().equals(new Carta(7))) {
+            for (Map.Entry<Carta, Integer> entry : mano.entrySet()) {
+                if (entry.getKey().val() <= 7 || entry.getKey().isSpecial()) {
+                    selSet.add(new Selezione(entry.getKey(), entry.getValue()));
+                }
+            }
+        } else {
+            for (Map.Entry<Carta, Integer> entry : mano.entrySet()) {
+                if (entry.getKey().isSpecial() || entry.getKey().val() >= Tavolo.getCarta().val()) {
+                    selSet.add(new Selezione(entry.getKey(), entry.getValue()));
+                }
+            }
+        }
+        if (selSet.isEmpty()) {
+            for (Map.Entry<Carta, Integer> entry : mano.entrySet()) {
+                selSet.add(new Selezione(entry.getKey(), entry.getValue()));
+            }
+        }
+        return selSet;
+    };
+
+    private String stringScelte(Set<Selezione> selSet) {
+        StringBuilder sb = new StringBuilder("Lista delle scelte disponibili:\n");
+        for (Selezione s: selSet) {
+            sb.append("Fino a ").append(s.toString()).append("\n");
+        }
+        return sb.toString();
+    }
 
 }

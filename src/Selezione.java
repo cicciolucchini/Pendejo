@@ -21,6 +21,11 @@ public class Selezione {
         n = 1;
     }
 
+    public Selezione() {
+        carta = null;
+        n = 0;
+    }
+
 
     /**
      * Costruttore che crea una selezione composta da un numero variabile di copie (compreso tra 1 e
