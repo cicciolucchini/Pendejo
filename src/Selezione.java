@@ -81,16 +81,7 @@ public class Selezione {
     }
 
     public int hashCode() {
-        int valore = getCarta().val();
-        int num = getN();
-        int h;
-        if (valore < 10) {
-            h = num*10;
-        } else {
-            h = num*100;
-        }
-        return h+valore;
-
+        return (13*getN())+getCarta().toString().hashCode();
     }
 
     public boolean equals(Object o) {

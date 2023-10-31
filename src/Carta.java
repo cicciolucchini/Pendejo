@@ -1,3 +1,8 @@
+import java.util.HashMap;
+import java.util.Map;
+
+import static java.util.Map.entry;
+
 /**
 Classe che descrive una Carta, ovvero un oggetto dotato di valore numerico, da 1 a 13 compresi.
 Le carte 2, 3, e 10 sono cosiddette speciali.
@@ -6,13 +11,35 @@ public class Carta {
     //Il valore numerico della carta
     private final int valore;
     /**
+     * Il nome della carta.
+     */
+    private final String nome;
+
+    public Map<Integer, String> CardMap = Map.ofEntries(
+            entry(2, "Due"),
+            entry(3, "Tre"),
+            entry(4, "Quattro"),
+            entry(5, "Cinque"),
+            entry(6, "Sei"),
+            entry(7, "Sette"),
+            entry(8, "Otto"),
+            entry(9, "Nove"),
+            entry(10, "Dieci"),
+            entry(11, "Jack"),
+            entry(12, "Queen"),
+            entry(13, "King"),
+            entry(14, "Asso")
+    );
+
+    /**
      * Crea una nuova carta col valore specificato
      * @param n il valore della carta
      * @throws IllegalArgumentException se il numero della carta non è compreso tra 1 e 13.
      */
     public Carta(int n) throws IllegalArgumentException{
-        if (n > 13 || n < 1) {throw new IllegalArgumentException();}
+        if (n > 14 || n < 2) {throw new IllegalArgumentException();}
         valore = n;
+        nome = CardMap.get(n);
     }
 
     /**
@@ -41,12 +68,7 @@ public class Carta {
     };
 
     public String toString() {
-        Integer val = (Integer) val();
-        if (val == 1) {return "A";}
-        if (val == 11) {return "J";}
-        if (val == 12) {return "Q";}
-        if (val == 13) {return "K";}
-        return val.toString();
+        return nome;
     }
 
 }

@@ -1,7 +1,4 @@
-import java.util.EmptyStackException;
-import java.util.Stack;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 
 /**
  * Classe che descrive un mazzo di carte, dotato di un numero variabile di carte impilate.
