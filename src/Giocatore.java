@@ -1,17 +1,14 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class Giocatore {
     private final Map<Carta, Integer> mano = new HashMap<>(13);
 
-    private final Carta[] scoperte = new Carta[3];
+    private final Map<Carta, Integer> scoperte = new HashMap<>(3);
 
-    private final Carta[] coperte = new Carta[3];
+    private final Map<Carta, Integer> coperte = new HashMap<>(3);
 
     private int size = 0;
     private int scop_size = 3;
@@ -79,7 +76,13 @@ public class Giocatore {
      */
     public void setCoperte(Carta[] c) throws IllegalArgumentException {
         if (c.length != 3) {throw new IllegalArgumentException();}
-        System.arraycopy(c, 0, coperte, 0, 3);
+        for (Carta carta : c) {
+            if (coperte.containsKey(carta)) {
+                coperte.replace(carta, coperte.get(carta)+1);
+            } else {
+                coperte.put(carta, 1);
+            }
+        }
     }
 
     /**
@@ -89,7 +92,11 @@ public class Giocatore {
      */
     public void setScoperte(Carta[] c) throws IllegalArgumentException {
         if (c.length != 3) {throw new IllegalArgumentException();}
-        System.arraycopy(c, 0, scoperte, 0, 3);
+        for (Carta carta : c) {
+            if (scoperte.containsKey(carta)) {
+                scoperte.replace(carta, scoperte.get(carta)+1);
+            } else coperte.put(carta, 1);
+        }
     }
 
     /**
@@ -137,80 +144,80 @@ public class Giocatore {
      * @return la selezione di carte giocate.
      */
     public Selezione scegliCarta(Selezione Tavolo) {
-        Set<Selezione> selSet = selezioneSet(Tavolo);
-        System.out.println(stringScelte(selSet));
-        System.out.println("Inserire la carta scelta");
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         Selezione scelta = new Selezione();
-        try {
-            String carta = reader.readLine();
-            for (Selezione s : selSet) {
-                if (s.getCarta().toString().equals(carta)) {
-                    System.out.println("Inserire il numero di carte da giocare");
-                    int n = Integer.parseInt(reader.readLine());
-                    scelta = new Selezione(s.getCarta(), n);
+        Set<Selezione> eligibles = new HashSet<>();
+        if (size == 0) {
+            if (scop_size == 0) {
+                for (Carta c: coperte.keySet()) {
+                    if (c.playable(Tavolo.getCarta())) {
+                        eligibles.add(new Selezione(c, coperte.get(c)));
+                    }
+                }
+                if (eligibles.isEmpty()) {
+                    scelta = menuNoScelte(coperte);
+                } else scelta = menuScelta(eligibles);
+            } else {
+                for (Carta c: scoperte.keySet()) {
+                    if (c.playable(Tavolo.getCarta())) {
+                        eligibles.add(new Selezione(c, scoperte.get(c)));
+                    }
+                }
+                if (eligibles.isEmpty()) {
+                    scelta = menuNoScelte(scoperte);
+                } else scelta = menuScelta(eligibles);
+            }
+        } else {
+            for (Carta c: mano.keySet()) {
+                if (c.playable(Tavolo.getCarta())) {
+                    eligibles.add(new Selezione(c, getCount(c)));
+                    diminuisciCarte(scelta.getCarta(), scelta.getN());
                 }
             }
-        } catch (IOException e) {
+            if (eligibles.isEmpty()) {
+                scelta = menuNoScelte(mano);
+            } else {
+                scelta = menuScelta(eligibles);
+                diminuisciCarte(scelta.getCarta(), scelta.getN());
+            }
         }
-        diminuisciCarte(scelta.getCarta(), scelta.getN());
         return scelta;
     }
 
-    private void diminuisciCarte(Carta c, int n) {
-        mano.replace(c, mano.get(c) - 1);
+    private Selezione menuScelta(Set<Selezione> set) {
+        String nomeScelto = new String();
+        Integer numScelto = 0;
+        Selezione scelta = new Selezione();
+        System.out.println(stringScelte(set));
+        System.out.println("Inserire carta da giocare");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        try {
+            nomeScelto = reader.readLine();
+        } catch (IOException e) {}
+        System.out.println("Inserire numero di carte da giocare");
+        try {
+            numScelto = Integer.parseInt(reader.readLine());
+        } catch (IOException e) {}
+        for (Selezione s : set) {
+            if (s.getCarta().toString().equals(nomeScelto)) {
+                scelta = new Selezione(s.getCarta(), numScelto);
+            }
+        }
+        return scelta;
     }
 
-    /**
-     * Restituisce l'insieme delle scelte possibili.
-     * @param Tavolo le carte sul tavolo
-     * @return l'insieme di scelte
-     */
-    private Set<Selezione> selezioneSet(Selezione Tavolo) {
-        Set<Selezione> selSet = new HashSet<>();
-        if (getSize() == 0 && scop_size == 0) {
+    private Selezione menuNoScelte(Map<Carta, Integer> carte) {
+        Set<Selezione> set = new HashSet<>();
+        String nomeScelto = new String();
+        Integer numScelto = 0;
+        for (Map.Entry<Carta, Integer> entry : carte.entrySet()) {
+            set.add(new Selezione(entry.getKey(), entry.getValue()));
+        }
+        System.out.println(stringScelte(set));
+        System.out.println("Inserire la carta da giocare");
+    }
 
-        } else {
-            if (getSize()== 0) {
-                for (Carta c : scoperte) {
-                    aggiungiCarta(c);
-                }
-                if (Tavolo.getCarta().equals(new Carta(7))) {
-                    for (Map.Entry<Carta, Integer> entry : mano.entrySet()) {
-                        if (entry.getKey().val() <= 7 || entry.getKey().isSpecial()) {
-                            selSet.add(new Selezione(entry.getKey(), entry.getValue()));
-                        }
-                    }
-                } else {
-                    for (Map.Entry<Carta, Integer> entry : mano.entrySet()) {
-                        if (entry.getKey().isSpecial() || entry.getKey().val() >= Tavolo.getCarta().val()) {
-                            selSet.add(new Selezione(entry.getKey(), entry.getValue()));
-                        }
-                    }
-                }
-            } else {
-                if (Tavolo.getCarta().equals(new Carta(7))) {
-                    for (Map.Entry<Carta, Integer> entry : mano.entrySet()) {
-                        if (entry.getKey().val() <= 7 || entry.getKey().isSpecial()) {
-                            selSet.add(new Selezione(entry.getKey(), entry.getValue()));
-                        }
-                    }
-                }
-                else {
-                    for (Map.Entry<Carta, Integer> entry : mano.entrySet()) {
-                        if (entry.getKey().isSpecial() || entry.getKey().val() >= Tavolo.getCarta().val()) {
-                            selSet.add(new Selezione(entry.getKey(), entry.getValue()));
-                        }
-                    }
-                }
-            }
-        }
-        if (selSet.isEmpty()) {
-            for (Map.Entry<Carta, Integer> entry : mano.entrySet()) {
-                selSet.add(new Selezione(entry.getKey(), entry.getValue()));
-            }
-        }
-        return selSet;
+    private void diminuisciCarte(Carta c, int n) {
+        mano.replace(c, mano.get(c) - n);
     }
 
     private String stringScelte(Set<Selezione> selSet) {

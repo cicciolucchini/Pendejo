@@ -73,4 +73,12 @@ public class Carta {
         return nome;
     }
 
+    public boolean playable(Carta c) {
+        if (c.val() == 7) {
+            return isSpecial() || val() <= c.val();
+        } else {
+            return isSpecial() || val() >= c.val();
+        }
+    }
+
 }
