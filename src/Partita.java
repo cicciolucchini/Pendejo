@@ -1,7 +1,7 @@
 import java.util.*;
 
 public class Partita {
-    private class PartitaFinitaException extends RuntimeException {
+    private static class PartitaFinitaException extends RuntimeException {
         String mex;
 
         private PartitaFinitaException(int i) {
@@ -17,7 +17,7 @@ public class Partita {
     public void giocaPartita() {
         mazzo.distribuisci(players);
         int playingCounter = 0;
-        int hannoFinito = 0;
+        int hannoFinito;
         int pendejo = 0;
         for (int i=0;i<4;i++) {
             if (players[i].haCarta(new Carta(4))) {
@@ -35,9 +35,10 @@ public class Partita {
                 System.out.println("Giocatore " + playingCounter);
                 System.out.println("Devi rispondere a " + pila.getTop().toString());
                 Selezione giocata = playing.scegliCarta(pila);
-                if (!giocata.getCarta().playable(pila.getTop().getCarta())) {
+                if (!(giocata.getCarta().playable(pila.getTop().getCarta()))) {
                     pila.aggiungi(giocata);
                     playing.pescaPila(pila);
+                    pila.wipePila();
                     playingCounter = (playingCounter + 1) % 4;
                 } else {
                     pila.aggiungi(giocata);

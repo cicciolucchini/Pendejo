@@ -140,10 +140,14 @@ public class Giocatore {
         Set<Selezione> eligibles = new HashSet<>();
         if (size == 0) {
             if (scop_size == 0) {
-                for (Carta c: coperte.keySet()) {
-                    if (c.playable(Tavolo.getCarta())) {
-                        eligibles.add(new Selezione(c, coperte.get(c)));
+                for (Map.Entry<Carta, Integer> e: coperte.entrySet()) {
+                    Carta c = e.getKey();
+                    if (e.getValue() > 0) {
+                        if (c.playable(Tavolo.getCarta())) {
+                            eligibles.add(new Selezione(c, coperte.get(c)));
+                        }
                     }
+
                 }
                 if (eligibles.isEmpty()) {
                     scelta = menuNoScelte(coperte);
@@ -156,9 +160,12 @@ public class Giocatore {
                 }
             } else {
                 for (Carta c: scoperte.keySet()) {
-                    if (c.playable(Tavolo.getCarta())) {
-                        eligibles.add(new Selezione(c, scoperte.get(c)));
+                    if (scoperte.get(c)>0) {
+                        if (c.playable(Tavolo.getCarta())) {
+                            eligibles.add(new Selezione(c, scoperte.get(c)));
+                        }
                     }
+
                 }
                 if (eligibles.isEmpty()) {
                     scelta = menuNoScelte(scoperte);
@@ -172,12 +179,15 @@ public class Giocatore {
             }
         } else {
             for (Carta c: mano.keySet()) {
-                if (c.playable(Tavolo.getCarta())) {
-                    eligibles.add(new Selezione(c, getCount(c)));
-                    diminuisciCarte(scelta.getCarta(), scelta.getN());
+                if (getCount(c)>0) {
+                    if (c.playable(Tavolo.getCarta())) {
+                        eligibles.add(new Selezione(c, getCount(c)));
+                    }
                 }
+
             }
             if (eligibles.isEmpty()) {
+                System.out.println("NON HAI SCELTE");
                 scelta = menuNoScelte(mano);
                 diminuisciCarte(scelta.getCarta(), scelta.getN());
             } else {
