@@ -20,6 +20,17 @@ public class Scarti {
     }
     public void wipePila() {
         pila.clear();
-        top = new Selezione();
+        setTop(new Selezione());
+    }
+
+    public void aggiungi(Selezione scelta) {
+        pila.push(scelta);
+        if (getTop().getCarta().equals(scelta.getCarta())) {
+            setTop(new Selezione(scelta.getCarta(), scelta.getN() + getTop().getN()));
+        } else if (scelta.getCarta().equals(new Carta(2))) {
+            setTop(new Selezione());
+        } else if (!scelta.getCarta().equals(new Carta(3))) {
+            setTop(scelta);
+        }
     }
 }

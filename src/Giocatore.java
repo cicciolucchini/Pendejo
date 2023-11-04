@@ -100,15 +100,6 @@ public class Giocatore {
     }
 
     /**
-     * Incrementa o diminuisce la dimensione della mano di carte.
-     * @param increase determina se la dimensione viene incrementata (True) o diminuita (False).
-     */
-    public void setSize(boolean increase) {
-        if (increase) {size++;}
-        else {size--;}
-    }
-
-    /**
      * Restituisce il numero di carte in mano.
      * @return il numero di carte.
      */
@@ -140,10 +131,11 @@ public class Giocatore {
 
     /**
      * Effettua la selezione delle carte per conto del giocatore.
-     * @param Tavolo le carte a cui rispondere.
+     * @param pila la pila degli scarti.
      * @return la selezione di carte giocate.
      */
-    public Selezione scegliCarta(Selezione Tavolo) {
+    public Selezione scegliCarta(Scarti pila) {
+        Selezione Tavolo = pila.getTop();
         Selezione scelta = new Selezione();
         Set<Selezione> eligibles = new HashSet<>();
         if (size == 0) {
@@ -155,7 +147,13 @@ public class Giocatore {
                 }
                 if (eligibles.isEmpty()) {
                     scelta = menuNoScelte(coperte);
-                } else scelta = menuScelta(eligibles);
+                    coperte.replace(scelta.getCarta(), coperte.get(scelta.getCarta()) - scelta.getN());
+                    cop_size -= scelta.getN();
+                } else {
+                    scelta = menuScelta(eligibles);
+                    coperte.replace(scelta.getCarta(), coperte.get(scelta.getCarta()) - scelta.getN());
+                    cop_size -= scelta.getN();
+                }
             } else {
                 for (Carta c: scoperte.keySet()) {
                     if (c.playable(Tavolo.getCarta())) {
@@ -164,7 +162,13 @@ public class Giocatore {
                 }
                 if (eligibles.isEmpty()) {
                     scelta = menuNoScelte(scoperte);
-                } else scelta = menuScelta(eligibles);
+                    scoperte.replace(scelta.getCarta(), scoperte.get(scelta.getCarta()) - scelta.getN());
+                    scop_size -= scelta.getN();
+                } else {
+                    scelta = menuScelta(eligibles);
+                    scoperte.replace(scelta.getCarta(), scoperte.get(scelta.getCarta()) - scelta.getN());
+                    scop_size -= scelta.getN();
+                }
             }
         } else {
             for (Carta c: mano.keySet()) {
@@ -175,6 +179,7 @@ public class Giocatore {
             }
             if (eligibles.isEmpty()) {
                 scelta = menuNoScelte(mano);
+                diminuisciCarte(scelta.getCarta(), scelta.getN());
             } else {
                 scelta = menuScelta(eligibles);
                 diminuisciCarte(scelta.getCarta(), scelta.getN());
@@ -191,7 +196,7 @@ public class Giocatore {
         System.out.println("Inserire carta da giocare");
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         try {
-            nomeScelto = reader.readLine();
+            nomeScelto = reader.readLine().trim();
         } catch (IOException e) {}
         System.out.println("Inserire numero di carte da giocare");
         try {
@@ -206,18 +211,34 @@ public class Giocatore {
     }
 
     private Selezione menuNoScelte(Map<Carta, Integer> carte) {
+        Selezione scelta = new Selezione();
         Set<Selezione> set = new HashSet<>();
         String nomeScelto = new String();
         Integer numScelto = 0;
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         for (Map.Entry<Carta, Integer> entry : carte.entrySet()) {
             set.add(new Selezione(entry.getKey(), entry.getValue()));
         }
         System.out.println(stringScelte(set));
         System.out.println("Inserire la carta da giocare");
+        try {
+            nomeScelto = reader.readLine();
+        } catch (IOException e) {}
+        System.out.println("Inserire il numero di carte da giocare");
+        try {
+            numScelto = Integer.parseInt(reader.readLine());
+        } catch(IOException e) {}
+        for (Selezione s : set) {
+            if (s.getCarta().toString().equals(nomeScelto)) {
+                scelta = new Selezione(s.getCarta(), numScelto);
+            }
+        }
+        return scelta;
     }
 
     private void diminuisciCarte(Carta c, int n) {
         mano.replace(c, mano.get(c) - n);
+        size -= n;
     }
 
     private String stringScelte(Set<Selezione> selSet) {
@@ -238,4 +259,11 @@ public class Giocatore {
         }
     }
 
+    public boolean haCarta(Carta c) {
+        return (mano.get(c) > 0);
+    }
+
+    public boolean haFinito() {
+        return (size==0 && scop_size==0 && cop_size==0);
+    }
 }
