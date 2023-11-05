@@ -1,4 +1,3 @@
-import java.util.*;
 
 public class Partita {
     private static class PartitaFinitaException extends RuntimeException {
@@ -32,8 +31,8 @@ public class Partita {
             if (playing.haFinito()) {
                 playingCounter = (playingCounter + 1) % 4;
             } else {
-                System.out.println("Giocatore " + playingCounter);
-                System.out.println("Devi rispondere a " + pila.getTop().toString());
+                System.out.println("\nGiocatore " + playingCounter);
+                System.out.println("\nDevi rispondere a " + pila.getTop().toString());
                 Selezione giocata = playing.scegliCarta(pila);
                 if (!(giocata.getCarta().playable(pila.getTop().getCarta()))) {
                     pila.aggiungi(giocata);
@@ -46,7 +45,7 @@ public class Partita {
                         playing.pesca(mazzo, 3 - playing.getSize());
                     }
                     boolean daPulire = (giocata.getCarta().equals(new Carta(10)) ||
-                            pila.getTop().getN()%4==0
+                            (pila.getTop().getN()>0 && pila.getTop().getN()%4==0)
                     );
                     if (daPulire) {
                         pila.wipePila();

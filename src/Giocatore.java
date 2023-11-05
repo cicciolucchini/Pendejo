@@ -8,11 +8,10 @@ public class Giocatore {
 
     private final Map<Carta, Integer> scoperte = new HashMap<>(3);
 
-    private final Map<Carta, Integer> coperte = new HashMap<>(3);
+    private final List<Carta> coperte = new LinkedList<>();
 
     private int size = 0;
     private int scop_size = 3;
-
     private int cop_size = 3;
 
     public Giocatore() {
@@ -76,13 +75,7 @@ public class Giocatore {
      */
     public void setCoperte(Carta[] c) throws IllegalArgumentException {
         if (c.length != 3) {throw new IllegalArgumentException();}
-        for (Carta carta : c) {
-            if (coperte.containsKey(carta)) {
-                coperte.replace(carta, coperte.get(carta)+1);
-            } else {
-                coperte.put(carta, 1);
-            }
-        }
+        coperte.addAll(Arrays.asList(c));
     }
 
     /**
@@ -95,7 +88,7 @@ public class Giocatore {
         for (Carta carta : c) {
             if (scoperte.containsKey(carta)) {
                 scoperte.replace(carta, scoperte.get(carta)+1);
-            } else coperte.put(carta, 1);
+            } else scoperte.put(carta, 1);
         }
     }
 
@@ -136,65 +129,63 @@ public class Giocatore {
      */
     public Selezione scegliCarta(Scarti pila) {
         Selezione Tavolo = pila.getTop();
-        Selezione scelta = new Selezione();
-        Set<Selezione> eligibles = new HashSet<>();
-        if (size == 0) {
-            if (scop_size == 0) {
-                for (Map.Entry<Carta, Integer> e: coperte.entrySet()) {
-                    Carta c = e.getKey();
-                    if (e.getValue() > 0) {
-                        if (c.playable(Tavolo.getCarta())) {
-                            eligibles.add(new Selezione(c, coperte.get(c)));
-                        }
-                    }
-
-                }
-                if (eligibles.isEmpty()) {
-                    scelta = menuNoScelte(coperte);
-                    coperte.replace(scelta.getCarta(), coperte.get(scelta.getCarta()) - scelta.getN());
-                    cop_size -= scelta.getN();
-                } else {
-                    scelta = menuScelta(eligibles);
-                    coperte.replace(scelta.getCarta(), coperte.get(scelta.getCarta()) - scelta.getN());
-                    cop_size -= scelta.getN();
-                }
+        Selezione scelta;
+        if (size <= 0) {
+            if (scop_size <= 0) {
+                scelta = giocaCoperta();
             } else {
-                for (Carta c: scoperte.keySet()) {
-                    if (scoperte.get(c)>0) {
-                        if (c.playable(Tavolo.getCarta())) {
-                            eligibles.add(new Selezione(c, scoperte.get(c)));
-                        }
-                    }
-
-                }
-                if (eligibles.isEmpty()) {
-                    scelta = menuNoScelte(scoperte);
-                    scoperte.replace(scelta.getCarta(), scoperte.get(scelta.getCarta()) - scelta.getN());
-                    scop_size -= scelta.getN();
-                } else {
-                    scelta = menuScelta(eligibles);
-                    scoperte.replace(scelta.getCarta(), scoperte.get(scelta.getCarta()) - scelta.getN());
-                    scop_size -= scelta.getN();
-                }
+                scelta = giocaScoperta(Tavolo);
             }
         } else {
-            for (Carta c: mano.keySet()) {
-                if (getCount(c)>0) {
-                    if (c.playable(Tavolo.getCarta())) {
-                        eligibles.add(new Selezione(c, getCount(c)));
-                    }
-                }
+            scelta = giocaDaMano(Tavolo);
+        }
+        return scelta;
+    }
 
-            }
-            if (eligibles.isEmpty()) {
-                System.out.println("NON HAI SCELTE");
-                scelta = menuNoScelte(mano);
-                diminuisciCarte(scelta.getCarta(), scelta.getN());
-            } else {
-                scelta = menuScelta(eligibles);
-                diminuisciCarte(scelta.getCarta(), scelta.getN());
+    private Selezione giocaDaMano(Selezione tavolo) {
+        System.out.println("GIOCHI DALLA MANO");
+        Set<Selezione> eligibles = new HashSet<>();
+        Selezione scelta;
+        for (Map.Entry<Carta, Integer> entry : mano.entrySet()) {
+            if (entry.getValue() > 0 && entry.getKey().playable(tavolo.getCarta())) {
+                eligibles.add(new Selezione(entry.getKey(), entry.getValue()));
             }
         }
+        if (eligibles.isEmpty()) {
+            scelta = menuNoScelte(getMano());
+        } else {
+            scelta = menuScelta(eligibles);
+        }
+        mano.replace(scelta.getCarta(), mano.get(scelta.getCarta()) - scelta.getN());
+        size -= scelta.getN();
+        return scelta;
+    }
+
+    private Selezione giocaScoperta(Selezione tavolo) {
+        System.out.println("GIOCHI DALLE CARTE SCOPERTE");
+        Set<Selezione> eligibles = new HashSet<>();
+        Selezione scelta;
+        for (Map.Entry<Carta, Integer> entry : scoperte.entrySet()) {
+            if (entry.getValue()>0 && entry.getKey().playable(tavolo.getCarta())) eligibles.add(new Selezione(entry.getKey(), entry.getValue()));
+        }
+        if (eligibles.isEmpty()) scelta=menuNoScelte(scoperte);
+        else scelta = menuScelta(eligibles);
+        scoperte.replace(scelta.getCarta(), scoperte.get(scelta.getCarta()) - scelta.getN());
+        scop_size -= scelta.getN();
+        return scelta;
+    }
+
+    private Selezione giocaCoperta() {
+        System.out.println("GIOCHI DALLE CARTE COPERTE");
+        System.out.println("\nScegli una carta coperta scrivendone il numero. Numero di carte coperte: " + cop_size);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        int i = 1;
+        try {
+            i = Integer.parseInt(reader.readLine());
+        } catch (IOException e) {}
+        Selezione scelta = new Selezione(coperte.get(i-1), 1);
+        coperte.remove(i-1);
+        cop_size--;
         return scelta;
     }
 
@@ -203,12 +194,12 @@ public class Giocatore {
         Integer numScelto = 0;
         Selezione scelta = new Selezione();
         System.out.println(stringScelte(set));
-        System.out.println("Inserire carta da giocare");
+        System.out.println("\nInserire carta da giocare");
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         try {
             nomeScelto = reader.readLine().trim();
         } catch (IOException e) {}
-        System.out.println("Inserire numero di carte da giocare");
+        System.out.println("\nInserire numero di carte da giocare");
         try {
             numScelto = Integer.parseInt(reader.readLine());
         } catch (IOException e) {}
@@ -221,6 +212,7 @@ public class Giocatore {
     }
 
     private Selezione menuNoScelte(Map<Carta, Integer> carte) {
+        System.out.println("\nNON HAI SCELTE!");
         Selezione scelta = new Selezione();
         Set<Selezione> set = new HashSet<>();
         String nomeScelto = new String();
@@ -230,11 +222,11 @@ public class Giocatore {
             set.add(new Selezione(entry.getKey(), entry.getValue()));
         }
         System.out.println(stringScelte(set));
-        System.out.println("Inserire la carta da giocare");
+        System.out.println("\nInserire la carta da giocare");
         try {
             nomeScelto = reader.readLine();
         } catch (IOException e) {}
-        System.out.println("Inserire il numero di carte da giocare");
+        System.out.println("\nInserire il numero di carte da giocare");
         try {
             numScelto = Integer.parseInt(reader.readLine());
         } catch(IOException e) {}
@@ -246,16 +238,12 @@ public class Giocatore {
         return scelta;
     }
 
-    private void diminuisciCarte(Carta c, int n) {
-        mano.replace(c, mano.get(c) - n);
-        size -= n;
-    }
 
     private String stringScelte(Set<Selezione> selSet) {
         StringBuilder sb = new StringBuilder("Lista delle scelte disponibili:\n");
         for (Selezione s: selSet) {
-            if (getCount(s.getCarta()) >= 1) {
-                sb.append("Fino a ").append(s.toString()).append("\n");
+            if (s.getN() >= 1) {
+                sb.append("Fino a ").append(s).append("\n");
             }
         }
         return sb.toString();

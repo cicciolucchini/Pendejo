@@ -29,8 +29,8 @@ public class Scarti {
             setTop(new Selezione(scelta.getCarta(), scelta.getN() + getTop().getN()));
         } else if (scelta.getCarta().equals(new Carta(2))) {
             setTop(new Selezione());
-        } else if (!scelta.getCarta().equals(new Carta(3))) {
-            setTop(scelta);
-        }
+        } else if (scelta.getCarta().equals(new Carta(3))) {
+            setTop(new Selezione(getTop().getCarta(), 0));
+        } else setTop(scelta);
     }
 }
