@@ -13,13 +13,13 @@ public class Selezione {
     private int n;
 
     /**
-     * Costruttore che crea una selezione composta da una sola carta specificata.
-     * @param c la carta.
+     * Crea una selezione vuota.
      */
-    public Selezione(Carta c) {
-        carta = c;
-        n = 1;
+    public Selezione() {
+        carta = new Carta(4);
+        n = 0;
     }
+
 
     /**
      * Costruttore che crea una selezione composta da un numero variabile di copie (compreso tra 1 e
@@ -81,19 +81,16 @@ public class Selezione {
     }
 
     public int hashCode() {
-        int valore = getCarta().val();
-        int num = getN();
-        int h;
-        if (valore < 10) {
-            h = num*10;
-        } else {
-            h = num*100;
-        }
-        return h+valore;
-
+        return (13*getN())+getCarta().toString().hashCode();
     }
 
     public boolean equals(Object o) {
+        if (!(o instanceof Selezione)) throw new IllegalArgumentException();
         return (this.hashCode()==o.hashCode());
     };
+
+    public String toString() {
+        return getN() + " " + getCarta().toString();
+
+    }
 }

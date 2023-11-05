@@ -1,7 +1,4 @@
-import java.util.EmptyStackException;
-import java.util.Stack;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 
 /**
  * Classe che descrive un mazzo di carte, dotato di un numero variabile di carte impilate.
@@ -23,7 +20,7 @@ public class Mazzo {
         carte = new Stack<>();
         ArrayList<Carta> l = new ArrayList<>();
         int i;
-        for (i = 1; i < 14; i++) {
+        for (i = 2; i < 15; i++) {
             l.add(new Carta(i));
             l.add(new Carta(i));
             l.add(new Carta(i));
@@ -42,20 +39,20 @@ public class Mazzo {
      */
     public void distribuisci(Giocatore[] players) {
         Carta[] carte = new Carta[3];
-        for (int i = 0; i < players.length; i++) {
+        for (Giocatore g : players) {
             for (int j = 0; j < 3; j++) {
                 carte[j] = pesca();
             }
-            players[i].setCoperte(carte);
+            g.setCoperte(carte);
         }
-        for (int i = 0; i < players.length; i++) {
+        for (Giocatore g : players) {
             for (int j = 0; j < 3; j++) {
                 carte[j] = pesca();
             }
-            players[i].setScoperte(carte);
+            g.setScoperte(carte);
         }
-        for (int i = 0; i < players.length; i++) {
-            players[i].pesca(this, 3);
+        for (Giocatore g : players) {
+            g.pesca(this, 3);
         }
 
     }
