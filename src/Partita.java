@@ -1,10 +1,10 @@
 
 public class Partita {
     private static class PartitaFinitaException extends RuntimeException {
-        String mex;
+
 
         private PartitaFinitaException(int i) {
-            mex = "PARTITA FINITA!\n Il Pendejo è" + i;
+            System.out.println("PARTITA FINITA!\n Il Pendejo è" + i);
         }
     }
     private final Mazzo mazzo = new Mazzo();
